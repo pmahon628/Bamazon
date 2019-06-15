@@ -15,14 +15,8 @@ var inquirer = require("inquirer");
 
 var connection = mysql.createConnection({
   host: "localhost",
-
-
   port: 3306,  
-
-
   user: "root",  
-
-  // Your password
   password: "Jack1348",  
   database: "bamazon" 
 });
@@ -48,6 +42,46 @@ var displayProducts = function(){
 				);
 		}
 		console.log(displayTable.toString());
-		purchaseßPrompt();
+		purchasePrompt();
 	});
-}
+};
+
+function start() {
+	inquirer
+	  .prompt({
+		name: "idAndBuy",
+		type: "list",
+		message: "What product [ID] would you like to [BUY] at the store?",
+		choices: ["ID", "BUY", "EXIT"]
+	  })
+	  .then(function(answer) {
+		
+		if (answer.idAndBuy === "ID") {
+		  productID();
+		}
+		else if(answer.idAndBuy=== "BUY") {
+			purchaseProduct();
+		} else{
+		  connection.end();
+		}
+	  });
+  }
+
+  function purchaseProduct(){
+	  inquirer
+	  	.prompt({
+			  name: "ID",
+			  type: "input",
+			  message: "Enter the ID of the product you want to buy?",
+			  filter: "number",
+		  },
+		  {
+			  name: "Buy",
+			  type: "input",
+			  message: "How much product would you like to buy?",
+			  filter: "number"
+			})
+
+  }
+  
+
