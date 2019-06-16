@@ -8,10 +8,8 @@
 // This means updating the SQL database to reflect the remaining quantity.
 // Once the update goes through, show the customer the total cost of their purchase.
 
-
 var mysql = require("mysql");  
 var inquirer = require("inquirer");   
-
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -21,16 +19,18 @@ var connection = mysql.createConnection({
   database: "bamazon" 
 });
 
-
-connection.connect(function(err) {
-  if (err) throw err;
-  
-  start();
+function start(){
+	connection.connect(function(err) {
+		if (err) throw err;
+		for(var i = 0; i<res.length;i++){
+			console.log("ID: " + res[i].item_ID + " | " + "Product: " + res[i].product_name + " | " + "Department: " + res[i].department_name + " | " + "Price: " + res[i].Price + " | " + "QTY: " + res[i].stock_Quantity)
+	};
 });
-////function to display products to the customer
+
+// display products to the customer
 var displayProducts = function(){
 	var query = "Select * FROM products";
-	connection.query(query, function(err, res){
+	connection.query(query, function(res, err){
 		if(err) throw err;
 		var displayTable = new Table ({
 			head: ["Item_id", "product_name", "department_name", "price", "stock_quantity"],
@@ -42,16 +42,16 @@ var displayProducts = function(){
 				);
 		}
 		console.log(displayTable.toString());
-		purchasePrompt();
+		// purchasePrompt();
 	});
 };
-
+//function to list and purhcase products 
 function start() {
 	inquirer
 	  .prompt({
 		name: "idAndBuy",
 		type: "list",
-		message: "What product [ID] would you like to [BUY] at the store?",
+		message: "What product [ID] would you like to [BUY] at the store? Or do you wan to [E}XIT]",
 		choices: ["ID", "BUY", "EXIT"]
 	  })
 	  .then(function(answer) {
@@ -59,14 +59,22 @@ function start() {
 		if (answer.idAndBuy === "ID") {
 		  productID();
 		}
-		else if(answer.idAndBuy=== "BUY") {
+
+		else if(answer.idAndBuy === "BUY") {
 			purchaseProduct();
-		} else{
+		}
+		
+		else if(answer.idAndBuy === "EXIT"){
+			byeByebye();
+		}
+		
+		else{
 		  connection.end();
 		}
 	  });
-  }
+	}
 
+	//function for actually purchasing products
   function purchaseProduct(){
 	  inquirer
 	  	.prompt({
@@ -80,8 +88,5 @@ function start() {
 			  type: "input",
 			  message: "How much product would you like to buy?",
 			  filter: "number"
-			})
-
-  }
-  
-
+			});
+	  }
