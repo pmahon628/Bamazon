@@ -19,13 +19,9 @@ var connection = mysql.createConnection({
   database: "bamazon" 
 });
 
-function start(){
-	connection.connect(function(err) {
+connection.connect(function(err) {
 		if (err) throw err;
-		for(var i = 0; i<res.length;i++){
-			console.log("ID: " + res[i].item_ID + " | " + "Product: " + res[i].product_name + " | " + "Department: " + res[i].department_name + " | " + "Price: " + res[i].Price + " | " + "QTY: " + res[i].stock_Quantity)
-	};
-});
+);
 
 // display products to the customer
 var displayProducts = function(){
@@ -42,15 +38,16 @@ var displayProducts = function(){
 				);
 		}
 		console.log(displayTable.toString());
-		// purchasePrompt();
+			purchasePrompt();
 	});
 };
+
 //function to list and purhcase products 
-function start() {
+function purchaseProduct() {
 	inquirer
 	  .prompt({
+			
 		name: "idAndBuy",
-		type: "list",
 		message: "What product [ID] would you like to [BUY] at the store? Or do you wan to [E}XIT]",
 		choices: ["ID", "BUY", "EXIT"]
 	  })
@@ -58,19 +55,19 @@ function start() {
 		
 		if (answer.idAndBuy === "ID") {
 		  productID();
-		}
+		},
 
 		else if(answer.idAndBuy === "BUY") {
 			purchaseProduct();
-		}
+		},
 		
 		else if(answer.idAndBuy === "EXIT"){
-			byeByebye();
-		}
+			console.log('byeByeBye);
+		},
 		
 		else{
 		  connection.end();
-		}
+		};
 	  });
 	}
 
@@ -78,6 +75,7 @@ function start() {
   function purchaseProduct(){
 	  inquirer
 	  	.prompt({
+				type: "input",
 			  name: "ID",
 			  type: "input",
 			  message: "Enter the ID of the product you want to buy?",
@@ -88,5 +86,35 @@ function start() {
 			  type: "input",
 			  message: "How much product would you like to buy?",
 			  filter: "number"
-			});
-	  }
+			};
+		
+		.then(function(answers){
+		
+		var quantityNeeded = answers.Quantity;
+		
+		var IDrequested = answers.ID;
+		
+		purchaseOrder(IDrequested, quantityNeeded);
+	});
+ 
+	function purchaseOrder(ID, amtNeeded){
+
+	connection.query('Select * FROM products WHERE item_id = ' + ID, function(err,res){
+		 
+		if(err){console.log(err)};
+		 
+		if(amtNeeded <= res[0].stock_quantity){
+			 
+			var totalCost = res[0].price * amtNeeded;
+			 
+			console.log("Good news your order is in stock!");
+			 console.log("Your total cost for " + amtNeeded + " " +res[0].product_name + " is " + totalCost + " Thank you!");
+ 
+			 connection.query("UPDATE products SET stock_quantity = stock_quantity - " + amtNeeded + "WHERE item_id = " + ID);
+		 } else{
+			 console.log("Insufficient quantity, sorry we do not have enough " + res[0].product_name + "to complete your order.");
+		 };
+		 displayProducts();
+	 });
+ };
+ 
